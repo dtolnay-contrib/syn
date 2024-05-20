@@ -3286,8 +3286,19 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.break_token.to_tokens(tokens);
         e.label.to_tokens(tokens);
-        if let Some(expr) = &e.expr {
-            print_expr(expr, tokens, fixup.subsequent_subexpression());
+        if let Some(value) = &e.expr {
+            print_subexpression(
+                value,
+                e.label.is_none()
+                    && match value {
+                        Expr::ForLoop(value) => value.label.is_some(),
+                        Expr::Loop(value) => value.label.is_some(),
+                        Expr::While(value) => value.label.is_some(),
+                        _ => false,
+                    },
+                tokens,
+                fixup.subsequent_subexpression(),
+            );
         }
     }
 
